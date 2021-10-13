@@ -1,0 +1,27 @@
+{
+  "name": "leadvertex/plugin-component-queue",
+  "description": "LeadVertex plugin queue abstract component",
+  "type": "library",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Timur Kasumov aka XAKEPEHOK",
+      "email": "support@leadvertex.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Leadvertex\\Plugin\\Components\\Queue\\": "src/"
+    }
+  },
+  "require": {
+    "php": ">=7.4.0",
+    "ext-json": "*",
+    "symfony/console": "^5.3",
+    "leadvertex/plugin-component-db": "^0.3.8",
+    "xakepehok/path": "^0.2.1",
+    "khill/php-duration": "^1.1",
+    "symfony/process": "^5.3"
+  }
+}
