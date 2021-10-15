@@ -5,7 +5,7 @@
  * @author Timur Kasumov (XAKEPEHOK)
  */
 
-namespace Leadvertex\Plugin\Components\Queue;
+namespace Leadvertex\Plugin\Components\Queue\Commands;
 
 use Khill\Duration\Duration;
 use Leadvertex\Plugin\Components\Db\ModelInterface;
