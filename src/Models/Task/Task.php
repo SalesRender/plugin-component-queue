@@ -8,6 +8,7 @@
 namespace Leadvertex\Plugin\Components\Queue\Models\Task;
 
 use Leadvertex\Plugin\Components\Db\Components\Connector;
+use Leadvertex\Plugin\Components\Db\Components\PluginReference;
 use Leadvertex\Plugin\Components\Db\Helpers\ReflectionHelper;
 use Leadvertex\Plugin\Components\Db\Helpers\UuidHelper;
 use Leadvertex\Plugin\Components\Db\Model;
@@ -16,6 +17,8 @@ abstract class Task extends Model
 {
 
     protected ?string $companyId = null;
+
+    protected ?string $pluginAlias = null;
 
     protected ?string $pluginId = null;
 
@@ -28,20 +31,23 @@ abstract class Task extends Model
         $this->id = UuidHelper::getUuid();
         if (Connector::hasReference()) {
             $this->companyId = Connector::getReference()->getCompanyId();
+            $this->pluginAlias = Connector::getReference()->getCompanyId();
             $this->pluginId = Connector::getReference()->getId();
         }
         $this->createdAt = time();
         $this->attempt = $attempt;
     }
 
-    public function getCompanyId(): int
+    public function getPluginReference(): ?PluginReference
     {
-        return $this->companyId;
-    }
-
-    public function getPluginId(): int
-    {
-        return $this->pluginId;
+        if ($this->companyId && $this->pluginAlias && $this->pluginId) {
+            return new PluginReference(
+                $this->companyId,
+                $this->pluginAlias,
+                $this->pluginId
+            );
+        }
+        return null;
     }
 
     protected static function beforeWrite(array $data): array
@@ -93,6 +99,7 @@ abstract class Task extends Model
     {
         return [
             'companyId' => ['VARCHAR(255)'],
+            'pluginAlias' => ['VARCHAR(255)'],
             'pluginId' => ['VARCHAR(255)'],
             'createdAt' => ['INT', 'NOT NULL'],
 
