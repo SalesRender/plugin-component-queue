@@ -31,7 +31,7 @@ abstract class Task extends Model
         $this->id = UuidHelper::getUuid();
         if (Connector::hasReference()) {
             $this->companyId = Connector::getReference()->getCompanyId();
-            $this->pluginAlias = Connector::getReference()->getCompanyId();
+            $this->pluginAlias = Connector::getReference()->getAlias();
             $this->pluginId = Connector::getReference()->getId();
         }
         $this->createdAt = time();
