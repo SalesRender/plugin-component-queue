@@ -38,7 +38,13 @@ abstract class QueueCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $mutex = fopen((string) Path::root()->down('runtime')->down("{$this->name}.mutex"), 'c');
+        $mutexFile = Path::root()->down('runtime')->down("{$this->name}.mutex");
+        $mutex = fopen((string) $mutexFile, 'c');
+
+        if (!$mutex) {
+            throw new RuntimeException("Can not create mutex file '{$mutexFile}'. No permissions?");
+        }
+
         if (!flock($mutex, LOCK_EX|LOCK_NB)) {
             fclose($mutex);
             throw new RuntimeException("Command '{$this->getName()}' already running");
