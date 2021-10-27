@@ -55,45 +55,47 @@ abstract class QueueCommand extends Command
             }
         }
 
-        $this->started = time();
-        $this->writeUsedMemory($output);
-
-        do {
+        try {
+            $this->started = time();
             $this->writeUsedMemory($output);
-            sleep(1);
 
-            foreach ($this->processes as $key => $process) {
-                if (!$process->isTerminated()) {
+            do {
+                $this->writeUsedMemory($output);
+                sleep(1);
+
+                foreach ($this->processes as $key => $process) {
+                    if (!$process->isTerminated()) {
+                        continue;
+                    }
+
+                    if ($process->isSuccessful()) {
+                        $output->writeln("<fg=green>[FINISHED]</> Process '{$key}' was finished.");
+                    } else {
+                        $output->writeln("<fg=red>[FAILED]</> Process '{$key}' with code '{$process->getExitCode()}' and message '{$process->getExitCodeText()}'.");
+                    }
+
+                    unset($this->processes[$key]);
+                }
+
+                if ($this->limit > 0 && count($this->processes) >= $this->limit) {
                     continue;
                 }
 
-                if ($process->isSuccessful()) {
-                    $output->writeln("<fg=green>[FINISHED]</> Process '{$key}' was finished.");
-                } else {
-                    $output->writeln("<fg=red>[FAILED]</> Process '{$key}' with code '{$process->getExitCode()}' and message '{$process->getExitCodeText()}'.");
+                $models = $this->findModels();
+                foreach ($models as $model) {
+                    if ($this->handleQueue($model)) {
+                        $this->startedLog($model, $output);
+                    }
                 }
 
-                unset($this->processes[$key]);
+            } while (memory_get_usage(true) < $this->maxMemoryInMb);
+
+            $output->writeln('<info> -- High memory usage. Stopped -- </info>');
+        } finally {
+            if ($isMutexEnabled) {
+                flock($mutex, LOCK_UN);
+                fclose($mutex);
             }
-
-            if ($this->limit > 0 && count($this->processes) >= $this->limit) {
-                continue;
-            }
-
-            $models = $this->findModels();
-            foreach ($models as $model) {
-                if ($this->handleQueue($model)) {
-                    $this->startedLog($model, $output);
-                }
-            }
-
-        } while (memory_get_usage(true) < $this->maxMemoryInMb);
-
-        $output->writeln('<info> -- High memory usage. Stopped -- </info>');
-
-        if ($isMutexEnabled) {
-            flock($mutex, LOCK_UN);
-            fclose($mutex);
         }
 
         return 0;
