@@ -155,9 +155,8 @@ abstract class QueueCommand extends Command
         $this->addOption(
             'disable-mutex',
             'dm',
-            InputOption::VALUE_OPTIONAL,
-            'Disable mutex for single run',
-            false
+            InputOption::VALUE_NONE,
+            'Disable mutex for single run'
         );
     }
 
