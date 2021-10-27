@@ -12,6 +12,7 @@ use Leadvertex\Plugin\Components\Db\ModelInterface;
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 use XAKEPEHOK\Path\Path;
@@ -38,16 +39,20 @@ abstract class QueueCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $mutexFile = Path::root()->down('runtime')->down("{$this->name}.mutex");
-        $mutex = fopen((string) $mutexFile, 'c');
+        $isMutexEnabled = !$input->getOption('disable-mutex');
 
-        if (!$mutex) {
-            throw new RuntimeException("Can not create mutex file '{$mutexFile}'. No permissions?");
-        }
+        if ($isMutexEnabled) {
+            $mutexFile = Path::root()->down('runtime')->down("{$this->name}.mutex");
+            $mutex = fopen((string) $mutexFile, 'c');
 
-        if (!flock($mutex, LOCK_EX|LOCK_NB)) {
-            fclose($mutex);
-            throw new RuntimeException("Command '{$this->getName()}' already running");
+            if (!$mutex) {
+                throw new RuntimeException("Can not create mutex file '{$mutexFile}'. No permissions?");
+            }
+
+            if (!flock($mutex, LOCK_EX|LOCK_NB)) {
+                fclose($mutex);
+                throw new RuntimeException("Command '{$this->getName()}' already running");
+            }
         }
 
         $this->started = time();
@@ -86,8 +91,10 @@ abstract class QueueCommand extends Command
 
         $output->writeln('<info> -- High memory usage. Stopped -- </info>');
 
-        flock($mutex, LOCK_UN);
-        fclose($mutex);
+        if ($isMutexEnabled) {
+            flock($mutex, LOCK_UN);
+            fclose($mutex);
+        }
 
         return 0;
     }
@@ -138,6 +145,18 @@ abstract class QueueCommand extends Command
         $max = round($this->maxMemoryInMb / 1024 / 1024, 2);
         $uptime = (new Duration(max(time() - $this->started, 1)))->humanize();
         $output->writeln("<info> -- Handled: {$this->handled}; Used {$used} MB of {$max} MB; Uptime: {$uptime} -- </info>");
+    }
+
+    protected function configure()
+    {
+        parent::configure();
+        $this->addOption(
+            'disable-mutex',
+            'dm',
+            InputOption::VALUE_OPTIONAL,
+            'Disable mutex for single run',
+            false
+        );
     }
 
 }
