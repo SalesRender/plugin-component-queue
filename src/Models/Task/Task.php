@@ -5,13 +5,13 @@
  * @author Timur Kasumov (XAKEPEHOK)
  */
 
-namespace Leadvertex\Plugin\Components\Queue\Models\Task;
+namespace SalesRender\Plugin\Components\Queue\Models\Task;
 
-use Leadvertex\Plugin\Components\Db\Components\Connector;
-use Leadvertex\Plugin\Components\Db\Components\PluginReference;
-use Leadvertex\Plugin\Components\Db\Helpers\ReflectionHelper;
-use Leadvertex\Plugin\Components\Db\Helpers\UuidHelper;
-use Leadvertex\Plugin\Components\Db\Model;
+use SalesRender\Plugin\Components\Db\Components\Connector;
+use SalesRender\Plugin\Components\Db\Components\PluginReference;
+use SalesRender\Plugin\Components\Db\Helpers\ReflectionHelper;
+use SalesRender\Plugin\Components\Db\Helpers\UuidHelper;
+use SalesRender\Plugin\Components\Db\Model;
 
 abstract class Task extends Model
 {

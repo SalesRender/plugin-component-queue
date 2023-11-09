@@ -5,7 +5,7 @@
  * @author Timur Kasumov (XAKEPEHOK)
  */
 
-namespace Leadvertex\Plugin\Components\Queue\Models\Task;
+namespace SalesRender\Plugin\Components\Queue\Models\Task;
 
 class TaskAttempt
 {
